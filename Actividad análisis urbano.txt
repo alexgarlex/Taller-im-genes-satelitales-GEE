@@ -1,0 +1,57 @@
+//Composición de imagen por cálculo de índice de vegatación para zona urbana
+
+//Cálculo de Normalized Difference Vegetation Index (NDVI)
+//Consultar una imagen del 2014
+var LN8_antes= ee.Image(ee.ImageCollection('LANDSAT/LC08/C01/T1_TOA')
+            .filterBounds(geometry)
+            .filterDate('2014-01-01','2014-12-31')
+            .sort('CLOUD COVER')
+            .first());
+            
+
+//Consultar una imagen del 2018
+var LN8_despues= ee.Image(ee.ImageCollection('LANDSAT/LC08/C01/T1_TOA')
+            .filterBounds(geometry)
+            .filterDate('2018-01-01','2018-12-31')
+            .sort('CLOUD COVER')
+            .first());
+
+//Cálculo de NDVI y NDWI para la imagen de 2014
+//Fórmula con expresión matemática
+var ndvi_mat= LN8_antes.expression(
+  '(SWIR-NIR)/(SWIR+NIR)',{
+    'SWIR': LN8_antes.select(['B6']),
+    'NIR': LN8_antes.select(['B5'])
+  })
+//Cálculo de NDVI para la imagen de 2014
+var ndvi_antes = LN8_antes.normalizedDifference(['B5', 'B4']).clip(geometry);
+
+//Cálculo de NDVI para la imagen de 2018
+var ndvi_despues = LN8_despues.normalizedDifference(['B5', 'B4']).clip(geometry);
+
+//Paleta de colores
+var palette = ['FFFFFF', 'CE7E45', 'DF923D', 'F1B555', 'FCD163', '99B718',
+ '74A901', '66A000', '529400', '3E8601', '207401', '056201',
+ '004C00', '023B01', '012E01', '011D01', '011301'];
+
+//Map.setOptions('satellite'); //Descomentar para obtener el mapa default GEE
+Map.addLayer(LN8_antes.clip(geometry),{},'Antes');
+Map.addLayer(LN8_despues.clip(geometry),{},'Despues');
+Map.addLayer(ndvi_antes.updateMask(ndvi_antes), {min:-1, max:1,palette:palette}, 'ndvi_antes');
+Map.addLayer(ndvi_despues.updateMask(ndvi_despues), {}, 'ndvi_despues');
+
+
+//Se imprimen los historgramas
+var histograma_antes = ui.Chart.image.histogram(ndvi_antes)
+histograma_antes.setOptions({
+  title: 'Histograma de NDVI en 2014'
+});
+print(histograma_antes)
+var histograma_despues = ui.Chart.image.histogram(ndvi_despues)
+histograma_despues.setOptions({
+  title: 'Histograma de NDVI en 2018'
+});
+print(histograma_despues)
+
+//Actividad: Modificar el script para obtener el análisis en otro polígono de área
+//Y guardar histogramas en Drive

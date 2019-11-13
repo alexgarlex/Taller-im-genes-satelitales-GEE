@@ -1,0 +1,35 @@
+//Script para visualizar las áreas protegidas de México
+
+//Se crea guarda la colección en una variable y se filtra por área
+var dataset = ee.FeatureCollection('WCMC/WDPA/current/polygons')
+              .filterBounds(geometry);
+              
+//Variable con datos de filtrado
+var siankaan = dataset.filterMetadata('NAME','equals',"Sian Ka'an");
+//Variable de parámetros de visualización
+var visParams = {
+  palette: ['2ed033', '5aff05', '67b9ff', '5844ff', '0a7618', '2c05ff'],
+  min: 0.0,
+  max: 1550000.0,
+  opacity: 0.8,
+};
+
+//Se extrae la imagen filtrada
+var image = ee.Image().float().paint(dataset, 'REP_AREA');
+//Se agregan al mapa las capas creadas
+Map.addLayer(image, visParams, 'WCMC/WDPA/current/polygons');
+Map.addLayer(dataset, null, 'for Inspector', false);
+Map.addLayer(siankaan, null, "Sian Kaan")
+
+//Se exporta la información obtenida a nuestra carpeta de Drive en formato CSV
+Export.table.toDrive({
+  collection: siankaan,
+  description:'Información de Sian Kaan',
+  fileFormat: 'CSV'
+});
+
+print(dataset)
+
+
+//Actividad:  Modificar este script para filtrar por otras áreas naturales protegidas  
+//y revisar el dataset para filtrar por diferentes propiedades del ANP elegido y exportar información a Drive.

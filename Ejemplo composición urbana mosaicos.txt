@@ -1,0 +1,94 @@
+//Ejemplo composición urbana en mosaico
+
+//Función para centrar imagen
+function initMap(map) {
+  map.setCenter(73.0371,19.031);
+}
+
+initMap(Map);
+
+//Imagenes seleccionadas y definición de bandas a usar
+var k=[3];
+var bands = ['B1', 'B2', 'B3', 'B4', 'B5', 'B6', 'B7'];
+//Imágenes temporales de Mumbai
+var image = ee.Image('LANDSAT/LT05/C01/T1/LT05_148047_19880319')
+.select(bands);
+var image1 = ee.Image('LANDSAT/LT05/C01/T1/LT05_148047_19990419')
+.select(bands);
+var image2 = ee.Image('LANDSAT/LT05/C01/T1/LT05_148047_20080427')
+.select(bands);
+var image3 = ee.Image('LANDSAT/LT05/C01/T1/LT05_148047_20111114')
+.select(bands);
+
+
+var urban = [88, 42, 48, 38, 86, 115, 59];
+var veg = [50, 21, 20, 35, 50, 110, 23];
+var water = [51, 20, 14, 9, 7, 116, 4];
+var places = {
+  Mumbai: [73.0371,19.031,12]};
+
+var select = ui.Select({
+  items: Object.keys(places),
+  onChange: function(key) {
+    k = places[key][0],places[key][1],places[key][2];
+    Map.setCenter(places[key][0], places[key][1],places[key][2]);
+  }
+  
+});
+
+
+select.setPlaceholder('Elige una locación...');
+print(select);
+
+var button = ui.Button({
+  label: 'Realizar Análisis Urbano',
+  onClick: function() {
+    var maps = [createMap1(),createMap2(),createMap3(),createMap4()];
+ui.root.widgets().reset(maps);
+var linker = ui.Map.Linker(maps);
+if(k==73.0371) 
+  maps[0].setCenter(73.0371,19.031, 12);
+if(k==88.363)
+  maps1[0].setCenter(88.363, 22.5715,12);
+if(k==77.593)
+  maps2[0].setCenter(77.593, 12.9744,12);
+  }
+});
+print(button);
+function createMap1() {
+  var map = new ui.Map();
+   map.addLayer(image, {bands: ['B4', 'B3', 'B2'], min: 0, max: 128}, 'image');
+  var fractions = image.unmix([urban, veg, water]);
+  map.addLayer(fractions, {}, 'unmixed');
+  map.add(ui.Label('Mumbai-1988', {position:'bottom-center'}));
+  return map;
+}
+  
+function createMap2() {
+  var map = new ui.Map();
+   map.addLayer(image1, {bands: ['B4', 'B3', 'B2'], min: 0, max: 128}, 'image');
+  var fractions = image1.unmix([urban, veg, water]);
+  map.addLayer(fractions, {}, 'unmixed');
+  map.add(ui.Label('Mumbai-1999', {position:'bottom-center'}));
+  return map;
+}
+function createMap3() {
+  var map = new ui.Map();
+   map.addLayer(image2, {bands: ['B4', 'B3', 'B2'], min: 0, max: 128}, 'image');
+  var fractions = image2.unmix([urban, veg, water]);
+  map.addLayer(fractions, {}, 'unmixed');
+  map.add(ui.Label('Mumbai-2008', {position:'bottom-center'}));
+  return map;
+}function createMap4() {
+  var map = new ui.Map();
+   map.addLayer(image3, {bands: ['B4', 'B3', 'B2'], min: 0, max: 128}, 'image');
+  var fractions = image3.unmix([urban, veg, water]);
+  map.addLayer(fractions, {}, 'unmixed');
+  map.add(ui.Label('Mumbai-2017', {position:'bottom-center'}));
+  return map;
+}
+
+
+
+
+
