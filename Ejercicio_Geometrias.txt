@@ -1,0 +1,21 @@
+//Script para añadir puntos y geometrías al mapa
+//Crear un punto específico
+//Primero especificar la longitud y luego la latitud
+var point = ee.Geometry.Point([___, ____]);
+//Verlo en el mapa
+Map.addLayer(point, {color: '000000'})
+
+//Añadir varios puntos
+var multiPoint = ee.Geometry.______([[_____, _______], [-85.38, 22]]);
+//Verlo en el mapa
+Map.addLayer(multiPoint, {color: 'FF0000'})
+
+//Crear una geometría específica
+//Rectángulo
+//Longitud y latitud, vértice inferior, vértice superior
+var rectangle = ee.Geometry.________([vertice1, vertice2]);
+Map.addLayer(rectangle, {color: 'FF0000'})
+//Triángulo
+var triangulo= ee.Geometry._______([
+  [[-87.68, 18.200], [-91.00, 18.200], [-87.68, 22]]]);
+Map.addLayer(triangulo, {color: 'FF0000'})

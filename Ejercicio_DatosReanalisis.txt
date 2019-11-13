@@ -1,0 +1,35 @@
+/Script para consultar datos de reanálisis
+//Filtrar la temperatura superficial del océano del modelo HYCOM
+//Aplicar filtros
+var SST = ee.Image(ee.ImageCollection('HYCOM/sea_temp_salinity')
+                          .select('water_temp_0')//Seleccionar banda
+                          .filter(ee.Filter.date('2018-08-01','2018-08-31'))//Filtro fecha
+                          .mean().clip(geometry)//El promedio de temperatura del océano para el mes y la zona
+//Filtrar la temperatura del océano a 1000 m de profundidad
+var ST_1000=ee.Image(ee.ImageCollection('HYCOM/sea_temp_salinity')
+                          .select(_________)
+                          .filter(ee.Filter.date(inicio,final))
+                          .mean().clip(geometry)
+
+//Realizar una resta de ambas bandar
+var DeltaT=  SST.subtract(ST_1000)
+//La escala de colores
+var visParams = {
+  min: ______,//Temperaturas mínimas
+  max: _______, //Temperaturas máximas
+  palette: ['000000', '005aff', '43c8c8', 'fff700', 'ff0000'],
+};
+//Centrar el mapa
+Map.setCenter(longiutd,latitud,zoom);
+//Añadir la fila al mapa
+Map.addLayer(DeltaT, visParams, 'Diferencia de temperatura');
+//Importar imagen
+Export.image.toDrive({
+  image: DeltaT,
+  description: 'Diferencia_Temperatura',
+  scale: 30,
+  region: geometry,
+  maxPixels: _____,
+});
+
+//Realizar una nueva diferencia de temperatura para otra región y a una profundidad diferente

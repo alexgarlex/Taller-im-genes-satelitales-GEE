@@ -1,0 +1,56 @@
+//Filtración de nubes en imágenes
+
+//Función que nos ayudará a componer imagen con la banda de
+//control BQA para identificar pixels de nubes y transformarlos
+function QuitarNubes(image) {
+  var qa = image.select('BQA');
+  //Identificador de pixels de nubes que podemos excluir de la imagen
+  var recorteMask = 1 << 4;
+  //Se realiza una composición con imagen limpia de nubes
+  var noNubesMask = qa.bitwiseAnd(recorteMask).eq(0);
+  //Se agrega esta composición como mascara a la imagen
+  return image.updateMask(noNubesMask);}
+  
+
+//LLamamos a la colección Landsat 8 y filtramos por fechas y coberturas de nubes para ajustar parámetros
+var Landsat = ee.ImageCollection('LANDSAT/LC08/C01/T1_RT') //Llamada a la colección Landsat 8
+  .filterDate('2018-05-01', '2019-05-30') //Filtro de fechas
+  .filter(ee.Filter.lt('CLOUD_COVER', 15))//Filtro de cobertura de nubes
+  .filterBounds (geometry) //Límites espaciales dibujados sobre el visor de GEE
+  .map(QuitarNubes);//Llama a función para elegir 
+  
+var Landsat2 = ee.ImageCollection('LANDSAT/LC08/C01/T1_RT') //Llamada a la colección Landsat 8
+  .filterDate('2018-05-01', '2019-05-30') //Filtro de fechas
+  .filterBounds (geometry); //Límites espaciales dibujados sobre el visor de GEE
+  
+
+//Representamos la composición RGB a color natural o falso color
+//Obtenemos una única imagen fruto de la combinación de píxels disponibles con ausencia de nube
+var param_bandas = {
+  min: 5000.0,
+  max: 30000.0,
+  bands: ['B7', 'B5', 'B2'],};
+
+Map.addLayer(Landsat2, param_bandas, 'Landsat con nubes');
+Map.addLayer(Landsat.median().clip(geometry), param_bandas, 'Landsat sin nubes');
+
+
+/*Ejercicio: Filtrar nubes en imagen de la colección y parámetros a gusto
+
+
+var im_ejercicio = ee.ImageCollection('__________________')
+  .filterDate('______', '_______') 
+  .filter(ee.Filter.lt('CLOUD_COVER', __))
+  .filterBounds (________) 
+
+var bandas_par = {
+  min: _____,
+  max: _____,
+  bands: [___, ___, ___]};
+  
+
+
+Map.addLayer(im_ejercicio.mean().clip(_____), bandas_par, 'Imágen sin nubes');
+print(im_ejercicio)
+
+  */

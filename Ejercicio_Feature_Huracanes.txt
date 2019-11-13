@@ -1,0 +1,49 @@
+// Script para mostrar la trayectoria de los huracanes
+//Cargar el dataset que contiene la información de los huracanes en el atlántico
+var hurricanes = ee.FeatureCollection('NOAA/NHC/HURDAT2/atlantic');
+//Para imprimir la primera tormenta registrada
+print('Primera tormenta registrada', hurricanes.first());
+//Filtrar el FeatureCollection
+//Primera forma de establecer la fecha
+var inicio=ee.Date('__');//Comando para colocar el año con formato de fecha
+var fin=ee.Date('______');
+//Segunda forma de establecer la fecha
+var anio=ee.Date('2005-10-01').getRange('_____')//getRange indica el intervalo
+//Para filtar de acuerdo a la fecha
+var points = hurricanes.filter(ee.Filter.date(anio));
+
+//Función para identificar cada uno de los ciclones
+//El ID corresponde al océano, número de ciclón, año
+var GetId = function(point) {
+  return ee.Feature(point).get('id');
+};
+//Map para correr el algoritmos e identificar los ID de cada tormenta de los datos filtrados
+var storm_ids = points.toList(1000).map(GetId).distinct();
+print(storm_ids)
+
+//Función para hacer las líneas de trayectoria de cada ciclón
+var Trayectory= function(storm_id){
+  //Obtener todas las lecturas de una tormenta
+  var pts = points.filter(ee.Filter.eq('id', ee.String(storm_id)));
+  pts = pts.sort('system:time_start');
+  //Crear el objeto línea
+  var line = ee.Geometry.LineString(pts.geometry().coordinates());
+  //Hacerla tipo Feature
+  var feature = ee.Feature(line);
+  return feature.set('id', storm_id);
+}
+
+// Crear la línea por cada huracán utilizando la función
+var lines = ee.FeatureCollection(storm_ids.map(Trayectory));
+
+//Añadir la capa de trayectorias
+Map.addLayer(____, {color: 'red'}, 'Trayectorias');
+
+//Añadir la capa de puntos
+//Map.addLayer(_____, {color: 'black'}, 'Entradas por huracán');
+
+Map.setCenter(-53, 36, 3);
+//Ejercico para filtrar el dataset de un huracán en específico
+var wilma = hurricanes.filterMetadata('name', '____','WILMA');
+Map.addLayer(wilma, {color:'black'}, 'Wilma')
+print(wilma
